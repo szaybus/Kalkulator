@@ -17,20 +17,12 @@ namespace Kalkulator {
         Operation operationPending;
         public Form1() {
             InitializeComponent();
-            foreach (var button in this.Controls.OfType<Button>()) {
-                int buttonNumber = int.Parse(button.Text);
-                if (buttonNumber >= 0 && buttonNumber <= 9) {
-                    button.Click += numberPressed;
-                } else button.Click += functionPressed;
-            }
-            result = Controls["ResultTextBox"] as TextBox;
+        }
+        private void Start(object sender, EventArgs e) {
+            result = Controls["tableLayoutPanel"].Controls["ResultTextBox"] as TextBox;
             this.operationPending = Operation.none;
         }
-        private void numberPressed(object sender, EventArgs e) {
-            Button buttonPressed = sender as Button;
-            result.Text += buttonPressed.Text;
-        }
-        private void functionPressed(object sender, EventArgs e) {
+        private void buttonPressed(object sender, EventArgs e) {
             Button buttonPressed = sender as Button;
             switch (buttonPressed.Text) {
                 case "C":
@@ -40,18 +32,27 @@ namespace Kalkulator {
                 case "-":
                 case "*":
                 case "/":
-                    if(operationPending == Operation.none) {
-                        mem = float.Parse(result.Text);
-                    } else {
-                        calculate();
-                    }
-                    result.Text = buttonPressed.Text;
-                    break;
                 case "=":
                     calculate();
-                    result.Text = mem.ToString();
+                    result.Text = "";
+                    switch (buttonPressed.Text) {
+                        case "+": operationPending = Operation.Add;
+                            break;
+                        case "-": operationPending = Operation.Sub;
+                            break;
+                        case "*": operationPending = Operation.Mul;
+                            break;
+                        case "/": operationPending = Operation.Div;
+                            break;
+                        case "=": operationPending = Operation.none;
+                            result.Text = mem.ToString();
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 default:
+                    result.Text += buttonPressed.Text;
                     break;
             }
             
@@ -69,6 +70,9 @@ namespace Kalkulator {
                     break;
                 case Operation.Div:
                     mem /= float.Parse(result.Text);
+                    break;
+                case Operation.none:
+                    mem = float.Parse(result.Text);
                     break;
             }
         }
